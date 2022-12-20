@@ -1,0 +1,99 @@
+body {
+    background-color: #dff8f8;
+    height: 100%;
+    overflow: auto;
+}
+
+
+.App {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #dff8f8;
+    min-width: 500px;
+}
+
+.header {
+    width: 90%;
+    height: 100px;
+    background-color: #c4dede;
+    display: flex;
+    justify-content: space-between;
+}
+
+.active {
+    background-color: #c4dede;
+    width: 100%;
+}
+
+.menu {
+    background-color: #dff8f8;
+    display: flex;
+    width: 90%;
+}
+
+.menu-item {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    width: 100px;
+    margin-right: 20px;
+    margin-left: 20px;
+    color: #0e434f;
+}
+
+.menu-item:hover {
+    cursor: pointer;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+.shop {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    margin: 5px;
+}
+
+.webshopName {
+    font-weight: bold;
+    font-size: 30px;
+    color: #0e434f;
+    text-decoration: #0e434f dotted underline;
+    text-underline-offset: 8px;
+}
+
+
+.buttonStyle {
+    border-color: #0e434f;
+    color: #0e434f;
+    background-color: #b2c7c7;
+    border-radius: 12px;
+    margin: 20px;
+    width: 100px;
+    height: 50px;
+    font-weight: bold;
+}
+
+input[id='searchBar'] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #0e434f;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+form {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    min-width: 150px;
+    margin: 5px;
+}

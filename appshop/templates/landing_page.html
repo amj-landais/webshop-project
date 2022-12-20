@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Webshop</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'landing_page.css' %}">
+</head>
+<body>
+
+<div class="welcome">
+    <img class="image" src="../static/logo.png" alt="Webshop's logo" width="100" height="100">
+    <h1 class="welcome-text">
+        Welcome in our web shop !
+    </h1>
+</div>
+
+
+<div class="info">
+    <div class="dynamic-info">
+        <div class="items">
+            Number of items: {{ nb_items }}
+        </div>
+        <div class="users">
+            Number of users: {{ nb_users }}
+        </div>
+    </div>
+
+    <div class="go_to_shop">
+        <div class="disclaimer">
+            By proceeding to the webshop you accept the terms and conditions.
+        </div>
+        <form action="{% url 'go_shop' %}" method="post">
+            {% csrf_token %}
+            <button class="button" type="submit" name="goToShop">Go to shop</button>
+        </form>
+    </div>
+
+    <div class="generate">
+        Click on the button below to generate 6 users, with 3 having 10 items.
+        <form action="{% url 'populate' %}" method="post">
+            {% csrf_token %}
+            <button class="button" type="submit" name='populateDB'
+            onclick="getElementById('populated').removeAttribute('hidden')">Populate database</button>
+        </form>
+        <h4 id="populated" hidden="hidden">Populated !</h4>
+    </div>
+
+</div>
+
+</body>
+</html>
