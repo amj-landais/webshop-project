@@ -25,7 +25,7 @@ class ItemListUserAPI(GenericAPIView):
 
     def get(self, request, token):
         user = Token.objects.get(key=token).user
-        items = Item.objects.filter(seller=user.username) | Item.objects.filter(buyer=user.username)
+        items = Item.objects.filter(seller=user) | Item.objects.filter(buyer=user)
         items = items.distinct().order_by("-created_date")
 
         serializer = DetailItemSerializer(items, many=True)
@@ -39,7 +39,7 @@ class ItemListUserAPI(GenericAPIView):
         data = serializer.validated_data
 
         item = Item(title=data["title"], description=data["description"], price=data["price"],
-                    seller=user.username, buyer='', status='WAITING')
+                    seller=user, status='WAITING')
         item.save()
         return Response({"message": "item created"})
 
@@ -51,7 +51,7 @@ class ItemListSaleUserAPI(GenericAPIView):
 
     def get(self, request, token):
         user = Token.objects.get(key=token).user
-        items = Item.objects.filter(Q(status='SALE'), ~Q(seller=user.username))
+        items = Item.objects.filter(Q(status='SALE'), ~Q(seller=user))
         items = items.order_by("-created_date")
 
         page = self.paginate_queryset(items)
@@ -70,7 +70,7 @@ class ItemListSaleUserSearchAPI(GenericAPIView):
 
     def get(self, request, token, search):
         user = Token.objects.get(key=token).user
-        items = Item.objects.filter(Q(status='SALE'), ~Q(seller=user.username))
+        items = Item.objects.filter(Q(status='SALE'), ~Q(seller=user))
         items = items.filter(title__contains=search)
         items = items.order_by("-created_date")
 
@@ -133,22 +133,41 @@ class ItemDetailsAPI(GenericAPIView):
     def put(self, request, item_id):
         item = get_object_or_404(Item, pk=item_id)
 
-        serializer = ModifyDetailItemSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data
+        token = request.headers['Authorization'][6:]
 
-        item.price = data["price"]
-        item.title = data["title"]
-        item.description = data["description"]
-        item.status = data["status"]
-        item.save()
+        if(item.status == 'SOLD'):
+            return Response({"message": "You can not modify an already sold item"})
 
-        return Response({"message": "item updated"})
+
+        if (item.seller != Token.objects.get(key=token).user):
+            return Response({"message": "You do not own this item"})
+
+        else:
+            serializer = ModifyDetailItemSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            data = serializer.validated_data
+
+            item.price = data["price"]
+            item.title = data["title"]
+            item.description = data["description"]
+            item.status = data["status"]
+            item.save()
+
+            return Response({"message": "item updated"})
 
     def delete(self, request, item_id):
         item = get_object_or_404(Item, pk=item_id)
-        item.delete()
-        return Response({"message": "item deleted"})
+        token = request.headers['Authorization'][6:]
+
+        if (item.status == 'SOLD'):
+            return Response({"message": "You can not delete an already sold item"})
+
+        if (item.seller != Token.objects.get(key=token).user):
+            return Response({"message": "You do not own this item"})
+
+        else:
+            item.delete()
+            return Response({"message": "item deleted"})
 
 
 class PopulateAPI(GenericAPIView):
@@ -170,44 +189,44 @@ class PopulateAPI(GenericAPIView):
         for u in [user1, user2, user3, user4, user5, user6]:
             Token.objects.create(user=u)
 
-        item0 = Item(title="piano", description="with tiles (black and white)!", price=500, seller="testuser1",
+        item0 = Item(title="piano", description="with tiles (black and white)!", price=500, seller=user1,
                      status='WAITING')
-        item1 = Item(title="drums", description="very good quality", price=60, seller="testuser1", status='SALE')
-        item2 = Item(title="table", description="with few scratches", price=20, seller="testuser1", status='SALE')
-        item3 = Item(title="chair", description="very comfortable", price=40, seller="testuser1", status='SALE')
-        item4 = Item(title="desk", description="few pen traces", price=30, seller="testuser1", status='SALE')
-        item5 = Item(title="kitchen stuff", description="used only during 3 months", price=10, seller="testuser1",
+        item1 = Item(title="drums", description="very good quality", price=60, seller=user1, status='SALE')
+        item2 = Item(title="table", description="with few scratches", price=20, seller=user1, status='SALE')
+        item3 = Item(title="chair", description="very comfortable", price=40, seller=user1, status='SALE')
+        item4 = Item(title="desk", description="few pen traces", price=30, seller=user1, status='SALE')
+        item5 = Item(title="kitchen stuff", description="used only during 3 months", price=10, seller=user1,
                      status='SALE')
-        item6 = Item(title="bed", description="almost new", price=400, seller="testuser1", status='SALE')
-        item7 = Item(title="curtains", description="with nice drawings", price=20, seller="testuser1", status='SALE')
-        item8 = Item(title="car", description="Renault one", price=900, seller="testuser1", status='SALE')
-        item9 = Item(title="lamp", description="nice lamp to read", price=10, seller="testuser1", status='SALE')
+        item6 = Item(title="bed", description="almost new", price=400, seller=user1, status='SALE')
+        item7 = Item(title="curtains", description="with nice drawings", price=20, seller=user1, status='SALE')
+        item8 = Item(title="car", description="Renault one", price=900, seller=user1, status='SALE')
+        item9 = Item(title="lamp", description="nice lamp to read", price=10, seller=user1, status='SALE')
 
-        item10 = Item(title="piano", description="with tiles (black and white)!", price=499, seller="testuser2",
+        item10 = Item(title="piano", description="with tiles (black and white)!", price=499, seller=user2,
                       status='WAITING')
-        item11 = Item(title="drums", description="very good quality", price=59, seller="testuser2", status='SALE')
-        item12 = Item(title="table", description="with few scratches", price=19, seller="testuser2", status='SALE')
-        item13 = Item(title="chair", description="very comfortable", price=39, seller="testuser2", status='SALE')
-        item14 = Item(title="desk", description="few pen traces", price=29, seller="testuser2", status='SALE')
-        item15 = Item(title="kitchen stuff", description="used only during 3 months", price=9, seller="testuser2",
+        item11 = Item(title="drums", description="very good quality", price=59, seller=user2, status='SALE')
+        item12 = Item(title="table", description="with few scratches", price=19, seller=user2, status='SALE')
+        item13 = Item(title="chair", description="very comfortable", price=39, seller=user2, status='SALE')
+        item14 = Item(title="desk", description="few pen traces", price=29, seller=user2, status='SALE')
+        item15 = Item(title="kitchen stuff", description="used only during 3 months", price=9, seller=user2,
                       status='SALE')
-        item16 = Item(title="bed", description="almost new", price=399, seller="testuser2", status='SALE')
-        item17 = Item(title="curtains", description="with nice drawings", price=19, seller="testuser2", status='SALE')
-        item18 = Item(title="car", description="Renault one", price=899, seller="testuser2", status='SALE')
-        item19 = Item(title="lamp", description="nice lamp to read", price=9, seller="testuser2", status='SALE')
+        item16 = Item(title="bed", description="almost new", price=399, seller=user2, status='SALE')
+        item17 = Item(title="curtains", description="with nice drawings", price=19, seller=user2, status='SALE')
+        item18 = Item(title="car", description="Renault one", price=899, seller=user2, status='SALE')
+        item19 = Item(title="lamp", description="nice lamp to read", price=9, seller=user2, status='SALE')
 
-        item20 = Item(title="piano", description="with tiles (black and white)!", price=505, seller="testuser3",
+        item20 = Item(title="piano", description="with tiles (black and white)!", price=505, seller=user3,
                       status='WAITING')
-        item21 = Item(title="drums", description="very good quality", price=65, seller="testuser3", status='SALE')
-        item22 = Item(title="table", description="with few scratches", price=25, seller="testuser3", status='SALE')
-        item23 = Item(title="chair", description="very comfortable", price=45, seller="testuser3", status='SALE')
-        item24 = Item(title="desk", description="few pen traces", price=35, seller="testuser3", status='SALE')
-        item25 = Item(title="kitchen stuff", description="used only during 3 months", price=15, seller="testuser3",
+        item21 = Item(title="drums", description="very good quality", price=65, seller=user3, status='SALE')
+        item22 = Item(title="table", description="with few scratches", price=25, seller=user3, status='SALE')
+        item23 = Item(title="chair", description="very comfortable", price=45, seller=user3, status='SALE')
+        item24 = Item(title="desk", description="few pen traces", price=35, seller=user3, status='SALE')
+        item25 = Item(title="kitchen stuff", description="used only during 3 months", price=15, seller=user3,
                       status='SALE')
-        item26 = Item(title="bed", description="almost new", price=405, seller="testuser3", status='SALE')
-        item27 = Item(title="curtains", description="with nice drawings", price=15, seller="testuser3", status='SALE')
-        item28 = Item(title="car", description="Renault one", price=905, seller="testuser3", status='SALE')
-        item29 = Item(title="lamp", description="nice lamp to read", price=15, seller="testuser3", buyer="testuser1",
+        item26 = Item(title="bed", description="almost new", price=405, seller=user3, status='SALE')
+        item27 = Item(title="curtains", description="with nice drawings", price=15, seller=user3, status='SALE')
+        item28 = Item(title="car", description="Renault one", price=905, seller=user3, status='SALE')
+        item29 = Item(title="lamp", description="nice lamp to read", price=15, seller=user3, buyer=user1,
                       status='SOLD')
 
         for item in [item0, item1, item2, item3, item4, item5, item6, item7, item8, item9,

@@ -4,7 +4,7 @@ function Item(props) {
 
     const changeStatus = (status) => {
 
-        console.log('Changing status to  ', status);
+        console.log('Changing status to  ', status, props.item.title);
         fetch(' http://127.0.0.1:8000/api/v1/item/' + props.item.pk, {
             method: 'PUT',
             headers: {

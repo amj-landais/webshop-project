@@ -181,6 +181,13 @@ function App() {
         console.log('useEffect: refreshItems done')
     }, [refreshItems])
 
+    //--------------------- MODIFY AN ITEM IN BASKET --------------------------
+
+    const modifyItemBasket = (item, idx) => {
+        setBasketList([...basketList.slice(0,idx), item, ...basketList.slice(idx+1)])
+    }
+
+
 
     //--------------------- LOADING MORE ITEMS --------------------------
 
@@ -240,7 +247,8 @@ function App() {
                         removeAllHandler={removeAllClick}
                         loggedIn={logged}
                         refreshItems={refreshItems}
-                        addItemBasket={addItemClick}></Basket>
+                        addItemBasket={addItemClick}
+                        modifyItemBasket={modifyItemBasket}></Basket>
 
             </div>
 
