@@ -5,7 +5,7 @@ function Item(props) {
     const changeStatus = (status) => {
 
         console.log('Changing status to  ', status, props.item.title);
-        fetch(' http://127.0.0.1:8000/api/v1/item/' + props.item.pk, {
+        fetch('http://127.0.0.1:8000/api/v1/item/' + props.item.pk, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,6 +39,17 @@ function Item(props) {
         width: '40%', minWidth: '300px', height: '270px', border: 'solid 2px #0e434f', margin: '10px',
         backgroundColor: '#dff8f8', textAlign: 'center', color: '#0e434f', display: 'flex',
         alignItems: 'center', flexDirection: 'column',
+    }
+
+    const buttonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        margin: 20,
+        width: 100,
+        height: 50,
+        fontWeight: 'bold'
     }
 
     return (
@@ -76,21 +87,14 @@ function Item(props) {
 }
 
 const addButtonStyle = {
-    width: '30px',
-    height: '30px',
-    fontWeight: 'bold',
-    margin: '20px',
-}
-
-const buttonStyle = {
     borderColor: '#0e434f',
     color: '#0e434f',
     backgroundColor: '#b2c7c7',
     borderRadius: 12,
-    margin: 20,
-    width: 100,
-    height: 50,
+    width: '50px',
+    height: '40px',
     fontWeight: 'bold',
+    margin: '20px',
 }
 
 function Label(props) {

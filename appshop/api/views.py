@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -9,7 +10,6 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
-
 from appshop.api.serializers import DetailItemSerializer, ShortDetailItemSerializer, ModifyDetailItemSerializer
 from appshop.models import Item
 from appshop.views import get_landing_page
@@ -120,6 +120,19 @@ class ItemListSearchAPI(GenericAPIView):
             return self.get_paginated_response([])
 
 
+def notify_email(seller, to, title, price):
+    subject = 'New item sold !' if seller else 'New item bought !'
+
+    message = 'You ' + ('sold' if seller else 'bought') + ' the item ' + title + ' (' + str(price) + '€).'
+    message = message + ' See you soon in our Webshop !'
+    send_mail(
+        subject,
+        message,
+        'no-reply@webshop.com',
+        [to],
+    )
+
+
 class ItemDetailsAPI(GenericAPIView):
     pagination_class = ItemPaginator
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -135,25 +148,35 @@ class ItemDetailsAPI(GenericAPIView):
 
         token = request.headers['Authorization'][6:]
 
-        if(item.status == 'SOLD'):
+        serializer = ModifyDetailItemSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        if item.status == 'SOLD':
             return Response({"message": "You can not modify an already sold item"})
 
-
-        if (item.seller != Token.objects.get(key=token).user):
+        if item.seller != Token.objects.get(key=token).user and data["status"] != 'SOLD':
             return Response({"message": "You do not own this item"})
 
         else:
-            serializer = ModifyDetailItemSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            data = serializer.validated_data
+            if item.seller == Token.objects.get(key=token).user and data["status"] == 'SOLD':
+                return Response({"message": "You can not buy your own item"})
+            else:
+                item.price = data["price"]
+                item.title = data["title"]
+                item.description = data["description"]
+                item.status = data["status"]
 
-            item.price = data["price"]
-            item.title = data["title"]
-            item.description = data["description"]
-            item.status = data["status"]
-            item.save()
+                # buy
+                if data["status"] == 'SOLD':
+                    user = Token.objects.get(key=token).user
+                    item.buyer = user
+                    notify_email(False, user.email, item.title, item.price)
+                    notify_email(True, item.seller.email, item.title, item.price)
 
-            return Response({"message": "item updated"})
+                item.save()
+
+                return Response({"message": "item updated"})
 
     def delete(self, request, item_id):
         item = get_object_or_404(Item, pk=item_id)

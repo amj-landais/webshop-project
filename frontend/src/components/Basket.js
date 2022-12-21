@@ -1,10 +1,10 @@
 import basketImg from '../media/shopping-basket.png'
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 function Basket(props) {
 
-    const [modifiedList, setModifiedList] = useState(() => props.itemList.map((item) => false));
-    const [modifiedStatusList, setModifiedStatusList] = useState(() => props.itemList.map((item) => false));
+    const [modifiedList, setModifiedList] = useState(() => props.itemList.map(() => false));
+    const [modifiedStatusList, setModifiedStatusList] = useState(() => props.itemList.map(() => false));
 
 
     const bStyle = {
@@ -65,10 +65,15 @@ function Basket(props) {
     }
 
     function closeClick() {
+        //reload the items
+        props.refreshItems();
+
         const modal = document.getElementById('modal');
         modal.style.display = 'none';
         setModifiedList(props.itemList.map(() => false))
         setModifiedStatusList(props.itemList.map(() => false))
+
+
     }
 
     function openModal() {
@@ -77,15 +82,30 @@ function Basket(props) {
 
     }
 
+    function removeItemHandler(idx) {
+        props.removeItemHandler(idx);
+
+        setModifiedList(prevState => {
+            prevState[idx] = false;
+            return prevState;
+        });
+
+        setModifiedStatusList(prevState => {
+            prevState[idx] = false;
+            return prevState;
+        });
+    }
+
 
     async function checkItemBuy(item, idx) {
+        let isBuyPossible = true;
         //1. Verify that the items are still available and unchanged
         const uri = 'http://127.0.0.1:8000/api/v1/item/' + item.pk
 
         await fetch(uri)
             .then(response => {
                 if (!response.ok) {
-                    if(response.status===404) {
+                    if (response.status === 404) {
                         throw new Error('item deleted');
                     }
                     throw new Error('Error in request');
@@ -102,6 +122,7 @@ function Basket(props) {
                     if (data.status !== 'SALE') {
                         console.log(item.title, 'status CHANGED: not on SALE');
 
+                        isBuyPossible = false;
                         setModifiedStatusList(prevState => {
                             prevState[idx] = true;
                             return prevState;
@@ -114,6 +135,7 @@ function Basket(props) {
                     else if (item.price !== data.price) {
                         console.log(item.title, 'price CHANGED');
 
+                        isBuyPossible = false;
                         setModifiedList(prevState => {
                             prevState[idx] = true;
                             return prevState;
@@ -125,13 +147,10 @@ function Basket(props) {
                 }
                 return item
             })
-            .then(() => {
-                //4. If all ok, each item receive 'SOLD' status + emails send to buyer/seller with list of bought/sold items
-
-            })
             .catch(err => {
                 console.log('ERROR: ', err);
 
+                isBuyPossible = false;
                 if (err.message === 'item deleted') {
                     setModifiedStatusList(prevState => {
                         prevState[idx] = true;
@@ -141,23 +160,70 @@ function Basket(props) {
 
                 }
             })
+
+        return isBuyPossible;
     }
 
-    function buy() {
+    async function changeStatusBuy(item, status) {
+
+        console.log('Changing status to  ', status, item.title);
+        await fetch('http://127.0.0.1:8000/api/v1/item/' + item.pk, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Token ' + props.token,
+            },
+            body: JSON.stringify({
+                title: item.title,
+                description: item.description,
+                price: item.price,
+                status: status
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('http error: ' + response.message)
+                }
+                return response.json()
+            })
+            .catch(response => {
+                console.log("Change status failed : ", response);
+            })
+    }
+
+    async function checkEachItem() {
         setModifiedList(props.itemList.map(() => false));
         setModifiedStatusList(props.itemList.map(() => false));
+        let isBuyPossible = true;
+        for (const [idx, item] of props.itemList.entries()) {
+            if (await checkItemBuy(item, idx) === false) {
+                isBuyPossible = false;
+            }
+        }
 
-        props.itemList.forEach(checkItemBuy);
-
+        return isBuyPossible
     }
 
+    async function buy() {
 
-    // useEffect(() => {
-    //     // props.refreshItems(props.loggedIn);
-    //     console.log("modifiedList !")
-    //     console.log(modifiedList)
-    // }, [modifiedList, props.loggedIn])
+        const isBuyPossible = await checkEachItem();
 
+        console.log("Each item CHECKED")
+
+        if (isBuyPossible) {
+            //If all ok, each item receive 'SOLD' status + emails send to buyer and seller
+            for (const item of props.itemList) {
+                await changeStatusBuy(item, 'SOLD')
+            }
+            console.log("Each item status CHANGED SOLD")
+
+
+            //close the modal
+            props.removeAllHandler();
+            closeClick();
+        }
+
+    }
 
     return (
         <div style={bStyle}>
@@ -198,7 +264,7 @@ function Basket(props) {
                                             width: 25,
                                             height: 25
                                         }}
-                                                onClick={() => props.removeItemHandler(idx)}>x
+                                                onClick={() => removeItemHandler(idx)}>x
                                         </button>
                                         {!modifiedStatusList[idx] && modifiedList[idx] &&
                                             <div style={{color: 'red', marginLeft: '5px'}}>← Price modified !</div>}
@@ -228,7 +294,9 @@ function Basket(props) {
                                 <button style={buttonStyle}
                                         onClick={props.removeAllHandler}>Remove all from basket
                                 </button>
-                                <button style={buttonStyle} onClick={buy}>BUY</button>
+                                <button style={buttonStyle}
+                                        onClick={buy}>BUY
+                                </button>
                             </div>
                         }
 

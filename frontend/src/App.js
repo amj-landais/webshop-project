@@ -30,13 +30,9 @@ function App() {
 
     const [searchText, setSearchText] = useState('')
 
-    function updateSearchText(e) {
-        console.log(e.target.value)
-        setSearchText(e.target.value);
-    }
 
     const addItemClick = (item) => {
-        console.log(item);
+        // console.log(item);
         setBasketList((prevState) => [...prevState, item]);
     }
 
@@ -184,9 +180,8 @@ function App() {
     //--------------------- MODIFY AN ITEM IN BASKET --------------------------
 
     const modifyItemBasket = (item, idx) => {
-        setBasketList([...basketList.slice(0,idx), item, ...basketList.slice(idx+1)])
+        setBasketList([...basketList.slice(0, idx), item, ...basketList.slice(idx + 1)])
     }
-
 
 
     //--------------------- LOADING MORE ITEMS --------------------------
@@ -209,7 +204,7 @@ function App() {
                 return response.json();
             })
             .then((data) => {
-                console.log('Data: ', data, data.count, data.next, data.prev, data.results);
+                // console.log('Data: ', data, data.count, data.next, data.prev, data.results);
                 setLoading(false);
                 setAvailableItems((prevItems) => [...prevItems, ...data.results]);
                 setTotalItems(data.count);
@@ -238,9 +233,6 @@ function App() {
                          alt="Shop's Logo"/>
                     <div className='webshopName'>Webshop</div>
                 </div>
-                <form>
-                    <input id='searchBar' type='text' value={searchText} onChange={updateSearchText} placeholder="Search an item here"/>
-                </form>
 
                 <Basket itemList={basketList}
                         removeItemHandler={removeItemClick}
@@ -248,7 +240,8 @@ function App() {
                         loggedIn={logged}
                         refreshItems={refreshItems}
                         addItemBasket={addItemClick}
-                        modifyItemBasket={modifyItemBasket}></Basket>
+                        modifyItemBasket={modifyItemBasket}
+                        token={token}></Basket>
 
             </div>
 
@@ -267,7 +260,9 @@ function App() {
                            element={<ItemsContainer loadMoreHandler={() => loadMore(nextPage)}
                                                     availableItems={availableItemsList}
                                                     totalNumberItems={totalItems} next={nextPage} loading={loading}
-                                                    error={error}/>}/>
+                                                    error={error}
+                                                    setSearchText={setSearchText}
+                                                    searchText={searchText}/>}/>
                     <Route path='/login'
                            element={<InputFormLogIn text={'Log in'} login={login} loggedIn={logged}></InputFormLogIn>}/>
                     <Route path='/signup'

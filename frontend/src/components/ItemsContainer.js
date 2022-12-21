@@ -1,4 +1,10 @@
 function ItemsContainer(props) {
+    function updateSearchText(e) {
+        console.log(e.target.value)
+        props.setSearchText(e.target.value);
+    }
+
+    //--------------------------- CSS ------------------------------
 
     const icStyle = {
         backgroundColor: '#c4dede',
@@ -16,9 +22,23 @@ function ItemsContainer(props) {
         fontWeight: 'bold'
     }
 
+    const centerStyle = {
+        display: 'flex',
+        justifyContent: 'center'
+    }
+
+
+    //--------------------------- RETURN ------------------------------
+
     return (
         <div style={icStyle}>
             <h1>Available items</h1>
+            <div style={centerStyle}>
+                <form>
+                    <input id='searchBar' type='text' value={props.searchText} onChange={updateSearchText}
+                           placeholder="Search an item here"/>
+                </form>
+            </div>
             <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}}>
                 {props.availableItems}
             </div>
@@ -30,7 +50,7 @@ function ItemsContainer(props) {
                     Load more items
                 </button>}
                 {props.loading && <h4>Loading ... {props.next} </h4>}
-                {(props.error!=="") && <h4>Error ... {props.error}</h4>}
+                {(props.error !== "") && <h4>Error ... {props.error}</h4>}
             </div>
         </div>
     )
