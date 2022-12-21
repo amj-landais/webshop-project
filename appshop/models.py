@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-
 class Item(models.Model):
     class Status(models.TextChoices):
         WAITING = 'WAITING'

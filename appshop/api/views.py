@@ -12,7 +12,6 @@ from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from appshop.api.serializers import DetailItemSerializer, ShortDetailItemSerializer, ModifyDetailItemSerializer
 from appshop.models import Item
-from django.template import loader
 
 
 class ItemPaginator(PageNumberPagination):
