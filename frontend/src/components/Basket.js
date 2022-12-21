@@ -7,63 +7,7 @@ function Basket(props) {
     const [modifiedStatusList, setModifiedStatusList] = useState(() => props.itemList.map(() => false));
 
 
-    const bStyle = {
-        color: '#0e434f',
-        width: '100px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    }
-
-    const buttonStyle = {
-        borderColor: '#0e434f',
-        color: '#0e434f',
-        backgroundColor: '#b2c7c7',
-        borderRadius: 12,
-        margin: 20,
-        width: 100,
-        height: 50,
-        fontWeight: 'bold'
-    }
-
-
-    const modal = {
-        display: 'none',
-        position: 'fixed', /* Stay in place */
-        zIndex: '1', /* Sit on top */
-        left: '0',
-        top: '0',
-        width: '100%', /* Full width */
-        height: '100%', /* Full height */
-        overflow: 'auto', /* Enable scroll if needed */
-        backgroundColor: 'rgba(0,0,0,0.6)', /* Black w/ opacity */
-    }
-
-    const modalContent = {
-        backgroundColor: '#dff8f8',
-        margin: '15% auto', /* 15% from the top and centered */
-        padding: '20px',
-        border: '3px solid #0e434f',
-        width: '50%',
-    }
-
-    const basketContentStyle = {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center'
-    }
-
-    const close = {
-        color: 'red',
-        float: 'right',
-        fontSize: '28px',
-        fontWeight: 'bold',
-        border: '2px solid #0e434f',
-        borderRadius: '8px',
-        width: '35px',
-        height: '35px',
-    }
-
+    /** close the basket modal */
     function closeClick() {
         //reload the items
         props.refreshItems();
@@ -73,15 +17,16 @@ function Basket(props) {
         setModifiedList(props.itemList.map(() => false))
         setModifiedStatusList(props.itemList.map(() => false))
 
-
     }
 
+    /** open the basket modal */
     function openModal() {
         const modal = document.getElementById('modal');
         modal.style.display = 'block';
 
     }
 
+    /** remove all the items of the basket */
     function removeItemHandler(idx) {
         props.removeItemHandler(idx);
 
@@ -96,10 +41,10 @@ function Basket(props) {
         });
     }
 
-
+    /** check if an item can be bought */
     async function checkItemBuy(item, idx) {
         let isBuyPossible = true;
-        //1. Verify that the items are still available and unchanged
+        //Verify that the items are still available and unchanged
         const uri = 'http://127.0.0.1:8000/api/v1/item/' + item.pk
 
         await fetch(uri)
@@ -115,10 +60,9 @@ function Basket(props) {
             .then((data) => {
                 if (data.date_modified === item.date_modified || (data.price === item.price && data.status === 'SALE')) {
                     console.log(item.title, ' is NOT changed');
-
                 } else {
 
-                    //3. If item not available anymore : notification (the user removes it manually)
+                    //If item not available anymore : notification (the user removes it manually)
                     if (data.status !== 'SALE') {
                         console.log(item.title, 'status CHANGED: not on SALE');
 
@@ -127,11 +71,10 @@ function Basket(props) {
                             prevState[idx] = true;
                             return prevState;
                         });
-
                         props.modifyItemBasket(item, idx)
                     }
 
-                    //2. If the price changed: update price + notification next to the item
+                    //If the price changed: update price + notification next to the item
                     else if (item.price !== data.price) {
                         console.log(item.title, 'price CHANGED');
 
@@ -140,9 +83,7 @@ function Basket(props) {
                             prevState[idx] = true;
                             return prevState;
                         });
-
                         props.modifyItemBasket(data, idx)
-
                     }
                 }
                 return item
@@ -157,13 +98,13 @@ function Basket(props) {
                         return prevState;
                     });
                     props.modifyItemBasket(item, idx)
-
                 }
             })
 
         return isBuyPossible;
     }
 
+    /** request to the backend to buy an item */
     async function changeStatusBuy(item, status) {
 
         console.log('Changing status to  ', status, item.title);
@@ -204,26 +145,82 @@ function Basket(props) {
         return isBuyPossible
     }
 
+
+    /** action to buy an item */
     async function buy() {
-
         const isBuyPossible = await checkEachItem();
-
-        console.log("Each item CHECKED")
 
         if (isBuyPossible) {
             //If all ok, each item receive 'SOLD' status + emails send to buyer and seller
             for (const item of props.itemList) {
                 await changeStatusBuy(item, 'SOLD')
             }
-            console.log("Each item status CHANGED SOLD")
 
-
-            //close the modal
             props.removeAllHandler();
             closeClick();
         }
 
     }
+
+    //------------------------- CSS --------------------------------
+
+    const bStyle = {
+        color: '#0e434f',
+        width: '100px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
+
+    const buttonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        margin: 20,
+        width: 100,
+        height: 50,
+        fontWeight: 'bold'
+    }
+
+    const modal = {
+        display: 'none',
+        position: 'fixed',
+        zIndex: '1',
+        left: '0',
+        top: '0',
+        width: '100%',
+        height: '100%',
+        overflow: 'auto',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    }
+
+    const modalContent = {
+        backgroundColor: '#dff8f8',
+        margin: '15% auto', /* 15% from the top and centered */
+        padding: '20px',
+        border: '3px solid #0e434f',
+        width: '50%',
+    }
+
+    const basketContentStyle = {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+    }
+
+    const close = {
+        color: 'red',
+        float: 'right',
+        fontSize: '28px',
+        fontWeight: 'bold',
+        border: '2px solid #0e434f',
+        borderRadius: '8px',
+        width: '35px',
+        height: '35px',
+    }
+
+    //------------------------- RETURN --------------------------------
 
     return (
         <div style={bStyle}>

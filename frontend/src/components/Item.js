@@ -34,6 +34,7 @@ function Item(props) {
             })
     }
 
+    //-------------------------- CSS -----------------------------------
 
     const iStyle = {
         width: '40%', minWidth: '300px', height: '270px', border: 'solid 2px #0e434f', margin: '10px',
@@ -51,6 +52,19 @@ function Item(props) {
         height: 50,
         fontWeight: 'bold'
     }
+
+    const addButtonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        width: '50px',
+        height: '40px',
+        fontWeight: 'bold',
+        margin: '20px',
+    }
+
+    //-------------------------- RETURN -----------------------------------
 
     return (
         <div style={iStyle}>
@@ -86,16 +100,6 @@ function Item(props) {
     )
 }
 
-const addButtonStyle = {
-    borderColor: '#0e434f',
-    color: '#0e434f',
-    backgroundColor: '#b2c7c7',
-    borderRadius: 12,
-    width: '50px',
-    height: '40px',
-    fontWeight: 'bold',
-    margin: '20px',
-}
 
 function Label(props) {
     const lStyle = {
@@ -122,7 +126,7 @@ function Price(props) {
     )
 }
 
-function Description(props) { //TODO: ellipsis ?
+function Description(props) {
     const boxStyle = {
         width: '100%', height: '50px'
     }

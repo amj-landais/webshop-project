@@ -12,29 +12,21 @@ import Account from "./components/Account";
 
 function App() {
 
+    const apiUriBase = 'http://127.0.0.1:8000/api/'
     const [availableItems, setAvailableItems] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     let availableItemsList = [];
     const [basketList, setBasketList] = useState(() => {
         if (localStorage.basketList) return JSON.parse(localStorage.getItem("basketList"));
         else return [];
-
     });
     const [logged, setLogged] = useState(false);
     const [username, setUsername] = useState(() => {
-        // this function is needed if we want to use local storage
         if (localStorage.username) {
             return localStorage.getItem("username");
         } else return ''
     });
-
-    const [searchText, setSearchText] = useState('')
-
-
-    const addItemClick = (item) => {
-        // console.log(item);
-        setBasketList((prevState) => [...prevState, item]);
-    }
+    const [searchText, setSearchText] = useState('');
 
     availableItemsList = availableItems.map((item) => {
             let clickable = true;
@@ -47,10 +39,20 @@ function App() {
         }
     )
 
+
+    /** add item to basketList */
+    const addItemClick = (item) => {
+        setBasketList((prevState) => [...prevState, item]);
+    }
+
+
+    /** remove all items from the basketList */
     const removeAllClick = () => {
         setBasketList([]);
     }
 
+
+    /** remove item from basketList */
     const removeItemClick = (itemId) => {
         setBasketList((prevState) => {
             return prevState.filter((id, idx) => idx !== itemId)
@@ -62,7 +64,6 @@ function App() {
         localStorage.setItem("basketList", JSON.stringify(basketList))
     }, [basketList])
 
-    //using local storage to store the username whenever it changes.
     useEffect(() => {
         localStorage.setItem("username", username)
     }, [username])
@@ -72,13 +73,6 @@ function App() {
         console.log('App changed');
         document.title = 'Webshop';
     }, [])
-
-
-    // const updateItemsBasket = (updatedList) => {
-    //     setBasketList(updatedList);
-    //     console.log(updatedList)
-    //     refreshItems(logged);
-    // }
 
 
     //--------------------- LOGGING IN --------------------------
@@ -101,7 +95,7 @@ function App() {
 
     const login = (user, pass) => {
         console.log('Logging in ', user, pass);
-        fetch(' http://127.0.0.1:8000/api/auth/v1/login/', {
+        fetch(apiUriBase + 'auth/v1/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -122,7 +116,7 @@ function App() {
                 setToken(data.token);
                 setLogged(true);
                 setUsername(user);
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + data.token)
+                setNextPage(apiUriBase + 'v1/items/sale/' + data.token)
             })
             .catch((err) => {
                 console.log("Error ", err);
@@ -132,8 +126,8 @@ function App() {
             })
     }
 
-    //--------------------- LOGGING OUT --------------------------
 
+    //--------------------- LOGGING OUT --------------------------
     const logout = () => {
         setToken('');
         setUsername('');
@@ -143,30 +137,25 @@ function App() {
     }
 
     //--------------------- REFRESH ITEMS --------------------------
-
     const refreshItems = useCallback(() => {
         setAvailableItems([]);
         if (logged) {
             if (searchText !== '') {
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + token + '/' + searchText);
-                loadMore('http://127.0.0.1:8000/api/v1/items/sale/' + token + '/' + searchText);
-                console.log("items with search bar & logged")
+                setNextPage(apiUriBase + 'v1/items/sale/' + token + '/' + searchText);
+                loadMore(apiUriBase + 'v1/items/sale/' + token + '/' + searchText);
             } else {
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + token)
-                loadMore('http://127.0.0.1:8000/api/v1/items/sale/' + token);
-                console.log("items with NO search bar & logged")
+                setNextPage(apiUriBase + 'v1/items/sale/' + token)
+                loadMore(apiUriBase + 'v1/items/sale/' + token);
 
             }
         } else {
             if (searchText !== '') {
                 setNextPage(apiUri + '/' + searchText)
                 loadMore(apiUri + '/' + searchText);
-                console.log("items with search bar & NOT logged")
 
             } else {
                 setNextPage(apiUri)
                 loadMore(apiUri);
-                console.log("items with NO search bar & NOT logged")
 
             }
         }
@@ -174,21 +163,17 @@ function App() {
 
     useEffect(() => {
         refreshItems()
-        console.log('useEffect: refreshItems done')
     }, [refreshItems])
 
     //--------------------- MODIFY AN ITEM IN BASKET --------------------------
-
     const modifyItemBasket = (item, idx) => {
         setBasketList([...basketList.slice(0, idx), item, ...basketList.slice(idx + 1)])
     }
 
-
     //--------------------- LOADING MORE ITEMS --------------------------
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const apiUri = 'http://127.0.0.1:8000/api/v1/items';
+    const apiUri = apiUriBase + 'v1/items';
     const [nextPage, setNextPage] = useState(apiUri);
 
     const loadMore = (page) => {

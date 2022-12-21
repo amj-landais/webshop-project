@@ -3,36 +3,9 @@ import {useState} from 'react';
 
 function Account(props) {
 
-    const accountStyle = {
-        width: '90%',
-        height: '500px',
-        backgroundColor: '#c4dede',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-    }
-
-    const fieldStyle = {
-        width: '200px'
-    }
-
-    const buttonStyle = {
-        borderColor: '#0e434f',
-        color: '#0e434f',
-        backgroundColor: '#b2c7c7',
-        borderRadius: 12,
-        margin: 20,
-        width: 100,
-        height: 50,
-        fontWeight: 'bold'
-    }
-
     const [oldPass, setOldPass] = useState('')
     const [newPass, setNewPass] = useState('')
     const [change, setChange] = useState(false);
-
-
     const username = props.username;
 
     function updateOldValue(e) {
@@ -43,7 +16,7 @@ function Account(props) {
         setNewPass(e.target.value);
     }
 
-    //--------------------- LOGGING OUT --------------------------
+    //--------------------- CHANGING PASSWORD --------------------------
     const [failed, setFailed] = useState(false);
 
     const changePassword = (oldPass, newPass) => {
@@ -78,6 +51,34 @@ function Account(props) {
             })
     }
 
+    //--------------------------- CSS ------------------------------
+
+    const accountStyle = {
+        width: '90%',
+        height: '500px',
+        backgroundColor: '#c4dede',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+
+    const fieldStyle = {
+        width: '200px'
+    }
+
+    const buttonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        margin: 20,
+        width: 100,
+        height: 50,
+        fontWeight: 'bold'
+    }
+
+    //--------------------------- RETURN ------------------------------
 
     if (!props.loggedIn) return <Navigate to='/login' replace/>
     else return (
@@ -105,6 +106,5 @@ function Account(props) {
         </div>
     )
 }
-
 
 export default Account;

@@ -12,7 +12,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import get_object_or_404
 from appshop.api.serializers import DetailItemSerializer, ShortDetailItemSerializer, ModifyDetailItemSerializer
 from appshop.models import Item
-from appshop.views import get_landing_page
+from django.template import loader
 
 
 class ItemPaginator(PageNumberPagination):
@@ -194,10 +194,6 @@ class ItemDetailsAPI(GenericAPIView):
 
 
 class PopulateAPI(GenericAPIView):
-
-    def get(self, request):
-        return get_landing_page(request)
-
     def post(self, request):
         Item.objects.all().delete()
         User.objects.all().delete()
@@ -257,4 +253,4 @@ class PopulateAPI(GenericAPIView):
                      item20, item21, item22, item23, item24, item25, item26, item27, item28, item29]:
             item.save()
 
-        return HttpResponseRedirect(reverse("home"))  # should redirect to a different URL !!!
+        return HttpResponseRedirect(reverse("home"))

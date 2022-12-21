@@ -53,6 +53,7 @@ function InputFormRegister(props) {
     }
 
 
+    //-------------------------- CSS -----------------------------------
     const registerStyle = {
         width: '90%',
         height: '500px',
@@ -74,6 +75,8 @@ function InputFormRegister(props) {
         fontWeight: 'bold'
     }
 
+
+    //-------------------------- RETURN -----------------------------------
 
     if (registered) return <Navigate replace to={'/shop/login'}></Navigate>
     else return (

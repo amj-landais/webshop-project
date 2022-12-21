@@ -21,7 +21,6 @@ function EditItem(props) {
         setPrice(e.target.value);
     }
 
-
     function closeClick() {
         const modal = document.getElementById('modalEdit' + props.item.pk);
         modal.style.display = 'none';
@@ -34,7 +33,6 @@ function EditItem(props) {
         const modal = document.getElementById('modalEdit' + props.item.pk);
         modal.style.display = 'block';
     }
-
 
     const editItem = () => {
         console.log('Editing item');
@@ -172,7 +170,6 @@ function EditItem(props) {
 
     return (
         <div style={editStyle}>
-
             <div>
                 <button style={buttonStyle} onClick={openModalEdit}>
                     Edit your item
