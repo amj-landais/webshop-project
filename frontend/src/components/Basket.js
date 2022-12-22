@@ -31,19 +31,18 @@ function Basket(props) {
         props.removeItemHandler(idx);
 
         setModifiedList(prevState => {
-            prevState[idx] = false;
-            return prevState;
+            return prevState.filter((id, index) => index !== idx)
         });
 
         setModifiedStatusList(prevState => {
-            prevState[idx] = false;
-            return prevState;
+            return prevState.filter((id, index) => index !== idx)
         });
     }
 
     /** check if an item can be bought */
-    async function checkItemBuy(item, idx) {
-        let isBuyPossible = true;
+    async function checkItemBuy(item, idx, isBuyPossible, newBasketList) {
+        let newBasketListTmp = newBasketList;
+        let isBuyPossibleTmp = isBuyPossible;
         //Verify that the items are still available and unchanged
         const uri = 'http://127.0.0.1:8000/api/v1/item/' + item.pk
 
@@ -60,30 +59,32 @@ function Basket(props) {
             .then((data) => {
                 if (data.date_modified === item.date_modified || (data.price === item.price && data.status === 'SALE')) {
                     console.log(item.title, ' is NOT changed');
+                    newBasketListTmp.push(data)
                 } else {
 
                     //If item not available anymore : notification (the user removes it manually)
                     if (data.status !== 'SALE') {
                         console.log(item.title, 'status CHANGED: not on SALE');
 
-                        isBuyPossible = false;
+                        isBuyPossibleTmp = false;
                         setModifiedStatusList(prevState => {
                             prevState[idx] = true;
                             return prevState;
                         });
-                        props.modifyItemBasket(item, idx)
+                        newBasketListTmp.push(item)
                     }
 
                     //If the price changed: update price + notification next to the item
                     else if (item.price !== data.price) {
                         console.log(item.title, 'price CHANGED');
 
-                        isBuyPossible = false;
+                        isBuyPossibleTmp = false;
                         setModifiedList(prevState => {
                             prevState[idx] = true;
                             return prevState;
                         });
-                        props.modifyItemBasket(data, idx)
+                        newBasketListTmp.push(data)
+
                     }
                 }
                 return item
@@ -91,17 +92,18 @@ function Basket(props) {
             .catch(err => {
                 console.log('ERROR: ', err);
 
-                isBuyPossible = false;
+                isBuyPossibleTmp = false;
                 if (err.message === 'item deleted') {
                     setModifiedStatusList(prevState => {
                         prevState[idx] = true;
                         return prevState;
                     });
-                    props.modifyItemBasket(item, idx)
+                    newBasketListTmp.push(item)
+
                 }
             })
 
-        return isBuyPossible;
+        return [isBuyPossibleTmp, newBasketListTmp];
     }
 
     /** request to the backend to buy an item */
@@ -136,11 +138,11 @@ function Basket(props) {
         setModifiedList(props.itemList.map(() => false));
         setModifiedStatusList(props.itemList.map(() => false));
         let isBuyPossible = true;
+        let newBasketList = []
         for (const [idx, item] of props.itemList.entries()) {
-            if (await checkItemBuy(item, idx) === false) {
-                isBuyPossible = false;
-            }
+            [isBuyPossible, newBasketList] = await checkItemBuy(item, idx, isBuyPossible, newBasketList)
         }
+        props.setBasketList(newBasketList)
 
         return isBuyPossible
     }
@@ -267,7 +269,7 @@ function Basket(props) {
                                             <div style={{color: 'red', marginLeft: '5px'}}>← Price modified !</div>}
                                         {modifiedStatusList[idx] &&
                                             <div style={{color: 'red', marginLeft: '5px'}}>
-                                                ← This item is not longer available
+                                                ← This item is no longer available
                                                 !</div>}
                                     </li>
                                 )

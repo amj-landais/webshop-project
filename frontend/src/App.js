@@ -12,21 +12,28 @@ import Account from "./components/Account";
 
 function App() {
 
-    const apiUriBase = 'http://127.0.0.1:8000/api/'
+    const apiUriBase = 'http://127.0.0.1:8000/api/';
+    const apiUri = apiUriBase + 'v1/items';
+
     const [availableItems, setAvailableItems] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     let availableItemsList = [];
     const [basketList, setBasketList] = useState(() => {
-        if (localStorage.basketList) return JSON.parse(localStorage.getItem("basketList"));
+        if (sessionStorage.basketList) return JSON.parse(sessionStorage.getItem("basketList"));
         else return [];
     });
     const [logged, setLogged] = useState(false);
     const [username, setUsername] = useState(() => {
-        if (localStorage.username) {
-            return localStorage.getItem("username");
+        if (sessionStorage.username) {
+            return sessionStorage.getItem("username");
         } else return ''
     });
     const [searchText, setSearchText] = useState('');
+
+    /** add item to basketList */
+    const addItemClick = (item) => {
+        setBasketList((prevState) => [...prevState, item]);
+    }
 
     availableItemsList = availableItems.map((item) => {
             let clickable = true;
@@ -39,11 +46,6 @@ function App() {
         }
     )
 
-
-    /** add item to basketList */
-    const addItemClick = (item) => {
-        setBasketList((prevState) => [...prevState, item]);
-    }
 
 
     /** remove all items from the basketList */
@@ -61,35 +63,36 @@ function App() {
 
     //using local storage to store the basket whenever it changes.
     useEffect(() => {
-        localStorage.setItem("basketList", JSON.stringify(basketList))
+        sessionStorage.setItem("basketList", JSON.stringify(basketList))
     }, [basketList])
 
     useEffect(() => {
-        localStorage.setItem("username", username)
+        sessionStorage.setItem("username", username)
     }, [username])
 
 
     useEffect(() => {
-        console.log('App changed');
         document.title = 'Webshop';
     }, [])
 
 
     //--------------------- LOGGING IN --------------------------
 
+    const [loginFailed, setLoginFailed] = useState(false);
+
     const [token, setToken] = useState(() => {
         // this function is needed if we want to use local storage
-        if (localStorage.token) {
-            if (localStorage.getItem("token") !== "\"\"") {
+        if (sessionStorage.token) {
+            if (sessionStorage.getItem("token") !== "\"\"") {
                 setLogged(true);
             }
-            return localStorage.getItem("token");
+            return sessionStorage.getItem("token");
         } else return '';
     });
 
     //using local storage to store the token whenever it changes.
     useEffect(() => {
-        localStorage.setItem("token", token)
+        sessionStorage.setItem("token", token)
     }, [token])
 
 
@@ -117,12 +120,14 @@ function App() {
                 setLogged(true);
                 setUsername(user);
                 setNextPage(apiUriBase + 'v1/items/sale/' + data.token)
+                setLoginFailed(false);
             })
             .catch((err) => {
                 console.log("Error ", err);
                 setUsername('');
                 setToken('');
                 setLogged(false);
+                setLoginFailed(true);
             })
     }
 
@@ -159,21 +164,15 @@ function App() {
 
             }
         }
-    }, [searchText, token, logged])
+    }, [searchText, token, logged, apiUri])
 
     useEffect(() => {
         refreshItems()
     }, [refreshItems])
 
-    //--------------------- MODIFY AN ITEM IN BASKET --------------------------
-    const modifyItemBasket = (item, idx) => {
-        setBasketList([...basketList.slice(0, idx), item, ...basketList.slice(idx + 1)])
-    }
-
     //--------------------- LOADING MORE ITEMS --------------------------
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const apiUri = apiUriBase + 'v1/items';
     const [nextPage, setNextPage] = useState(apiUri);
 
     const loadMore = (page) => {
@@ -225,8 +224,8 @@ function App() {
                         loggedIn={logged}
                         refreshItems={refreshItems}
                         addItemBasket={addItemClick}
-                        modifyItemBasket={modifyItemBasket}
-                        token={token}></Basket>
+                        token={token}
+                        setBasketList={setBasketList}></Basket>
 
             </div>
 
@@ -249,9 +248,9 @@ function App() {
                                                     setSearchText={setSearchText}
                                                     searchText={searchText}/>}/>
                     <Route path='/login'
-                           element={<InputFormLogIn text={'Log in'} login={login} loggedIn={logged}></InputFormLogIn>}/>
+                           element={<InputFormLogIn text={'Log in'} login={login} loggedIn={logged} loginFailed={loginFailed}/>}/>
                     <Route path='/signup'
-                           element={<InputFormRegister text={'Sign up'}></InputFormRegister>}/>
+                           element={<InputFormRegister text={'Sign up'} loggedIn={logged}></InputFormRegister>}/>
                     <Route path='/myitems'
                            element={<MyItems loggedIn={logged} token={token} username={username}></MyItems>}/>
                     <Route path='/account'

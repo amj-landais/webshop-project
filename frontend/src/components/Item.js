@@ -26,7 +26,6 @@ function Item(props) {
             })
             .then(data => {
                 console.log('data ', data);
-                console.log('props ', props);
                 props.fetchUserItems();
             })
             .catch(response => {
@@ -72,12 +71,10 @@ function Item(props) {
             <Description description={props.item.description}/>
             <Price price={props.item.price}/>
             <DateDisplay date={props.item.created_date}/>
-            {props.clickable && props.loggedIn && <button id='button' style={addButtonStyle} onClick={() => {
-                props.addHandler(props.item)
-            }}>
-                +
-            </button>}
-            {props.item.pk} -- {props.item.status} - {props.item.seller}
+            {props.clickable && props.loggedIn &&
+                <button style={addButtonStyle} onClick={() => props.addHandler(props.item)}>
+                    +
+                </button>}
 
             <div style={{display: 'flex', justifyContent: 'center'}}>
                 {!props.addBasketPossible && props.item.status === 'WAITING' &&

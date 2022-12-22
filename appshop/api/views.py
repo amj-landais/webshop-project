@@ -37,10 +37,13 @@ class ItemListUserAPI(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
-        item = Item(title=data["title"], description=data["description"], price=data["price"],
-                    seller=user, status='WAITING')
-        item.save()
-        return Response({"message": "item created"})
+        if data['price'] >= 0 :
+            item = Item(title=data["title"], description=data["description"], price=data["price"],
+                        seller=user, status='WAITING')
+            item.save()
+            return Response({"message": "item created"})
+        else:
+            return Response({"message": "negative price is not allowed"}, 500)
 
 
 class ItemListSaleUserAPI(GenericAPIView):
@@ -161,6 +164,9 @@ class ItemDetailsAPI(GenericAPIView):
             if item.seller == Token.objects.get(key=token).user and data["status"] == 'SOLD':
                 return Response({"message": "You can not buy your own item"})
             else:
+                if(data["price"]<0):
+                    return Response({"message": "negative price is not allowed"},500)
+
                 item.price = data["price"]
                 item.title = data["title"]
                 item.description = data["description"]

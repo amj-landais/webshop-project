@@ -78,7 +78,8 @@ function InputFormRegister(props) {
 
     //-------------------------- RETURN -----------------------------------
 
-    if (registered) return <Navigate replace to={'/shop/login'}></Navigate>
+    if (registered) return <Navigate replace to={'/login'}></Navigate>
+    else if (props.loggedIn) return <Navigate to="/myitems" replace/>
     else return (
         <div style={registerStyle}>
             <label style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>

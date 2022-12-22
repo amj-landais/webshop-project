@@ -26,6 +26,7 @@ function AddNewItem(props) {
         setTitle('');
         setPrice('');
         setDescription('');
+        setFailed(false);
     }
 
 
@@ -124,7 +125,7 @@ function AddNewItem(props) {
                         <div style={{width: '150px', textAlign: 'left'}}>
                             Price (€):
                         </div>
-                        <input style={inputStyle} type='text' value={price} onChange={updatePValue}/>
+                        <input style={inputStyle} type='number' step='0.01' value={price} onChange={updatePValue}/>
                     </div>
                 </label>
 

@@ -46,6 +46,7 @@ function InputFormLogIn(props) {
             </label>
             <button style={buttonStyle}
                     onClick={() => props.login(user, pass)}>{props.text}</button>
+            {props.loginFailed && <font style={{color: 'red', margin: '30px'}}>Login Failed</font>}
         </div>
     )
 }
