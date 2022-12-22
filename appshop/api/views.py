@@ -214,7 +214,7 @@ class PopulateAPI(GenericAPIView):
             Token.objects.create(user=u)
 
         item0 = Item(title="piano", description="with tiles (black and white)!", price=500, seller=user1,
-                     status='WAITING')
+                     status='SALE')
         item1 = Item(title="drums", description="very good quality", price=60, seller=user1, status='SALE')
         item2 = Item(title="table", description="with few scratches", price=20, seller=user1, status='SALE')
         item3 = Item(title="chair", description="very comfortable", price=40, seller=user1, status='SALE')
@@ -227,7 +227,7 @@ class PopulateAPI(GenericAPIView):
         item9 = Item(title="lamp", description="nice lamp to read", price=10, seller=user1, status='SALE')
 
         item10 = Item(title="piano", description="with tiles (black and white)!", price=499, seller=user2,
-                      status='WAITING')
+                      status='SALE')
         item11 = Item(title="drums", description="very good quality", price=59, seller=user2, status='SALE')
         item12 = Item(title="table", description="with few scratches", price=19, seller=user2, status='SALE')
         item13 = Item(title="chair", description="very comfortable", price=39, seller=user2, status='SALE')
@@ -240,7 +240,7 @@ class PopulateAPI(GenericAPIView):
         item19 = Item(title="lamp", description="nice lamp to read", price=9, seller=user2, status='SALE')
 
         item20 = Item(title="piano", description="with tiles (black and white)!", price=505, seller=user3,
-                      status='WAITING')
+                      status='SALE')
         item21 = Item(title="drums", description="very good quality", price=65, seller=user3, status='SALE')
         item22 = Item(title="table", description="with few scratches", price=25, seller=user3, status='SALE')
         item23 = Item(title="chair", description="very comfortable", price=45, seller=user3, status='SALE')
@@ -250,8 +250,8 @@ class PopulateAPI(GenericAPIView):
         item26 = Item(title="bed", description="almost new", price=405, seller=user3, status='SALE')
         item27 = Item(title="curtains", description="with nice drawings", price=15, seller=user3, status='SALE')
         item28 = Item(title="car", description="Renault one", price=905, seller=user3, status='SALE')
-        item29 = Item(title="lamp", description="nice lamp to read", price=15, seller=user3, buyer=user1,
-                      status='SOLD')
+        item29 = Item(title="lamp", description="nice lamp to read", price=15, seller=user3,
+                      status='SALE')
 
         for item in [item0, item1, item2, item3, item4, item5, item6, item7, item8, item9,
                      item10, item11, item12, item13, item14, item15, item16, item17, item18, item19,
