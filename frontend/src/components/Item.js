@@ -4,8 +4,8 @@ function Item(props) {
 
     const changeStatus = (status) => {
 
-        console.log('Changing status to  ', status);
-        fetch(' http://127.0.0.1:8000/api/v1/item/' + props.item.pk, {
+        console.log('Changing status to  ', status, props.item.title);
+        fetch('http://127.0.0.1:8000/api/v1/item/' + props.item.pk, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -26,7 +26,6 @@ function Item(props) {
             })
             .then(data => {
                 console.log('data ', data);
-                console.log('props ', props);
                 props.fetchUserItems();
             })
             .catch(response => {
@@ -34,6 +33,7 @@ function Item(props) {
             })
     }
 
+    //-------------------------- CSS -----------------------------------
 
     const iStyle = {
         width: '40%', minWidth: '300px', height: '270px', border: 'solid 2px #0e434f', margin: '10px',
@@ -41,18 +41,40 @@ function Item(props) {
         alignItems: 'center', flexDirection: 'column',
     }
 
+    const buttonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        margin: 20,
+        width: 100,
+        height: 50,
+        fontWeight: 'bold'
+    }
+
+    const addButtonStyle = {
+        borderColor: '#0e434f',
+        color: '#0e434f',
+        backgroundColor: '#b2c7c7',
+        borderRadius: 12,
+        width: '50px',
+        height: '40px',
+        fontWeight: 'bold',
+        margin: '20px',
+    }
+
+    //-------------------------- RETURN -----------------------------------
+
     return (
         <div style={iStyle}>
             <Label itemName={props.item.title.toUpperCase()}/>
             <Description description={props.item.description}/>
             <Price price={props.item.price}/>
             <DateDisplay date={props.item.created_date}/>
-            {props.clickable && props.loggedIn && <button id='button' style={addButtonStyle} onClick={() => {
-                props.addHandler(props.item)
-            }}>
-                +
-            </button>}
-            {props.item.pk} -- {props.item.status} - {props.item.seller}
+            {props.clickable && props.loggedIn &&
+                <button style={addButtonStyle} onClick={() => props.addHandler(props.item)}>
+                    +
+                </button>}
 
             <div style={{display: 'flex', justifyContent: 'center'}}>
                 {!props.addBasketPossible && props.item.status === 'WAITING' &&
@@ -75,23 +97,6 @@ function Item(props) {
     )
 }
 
-const addButtonStyle = {
-    width: '30px',
-    height: '30px',
-    fontWeight: 'bold',
-    margin: '20px',
-}
-
-const buttonStyle = {
-    borderColor: '#0e434f',
-    color: '#0e434f',
-    backgroundColor: '#b2c7c7',
-    borderRadius: 12,
-    margin: 20,
-    width: 100,
-    height: 50,
-    fontWeight: 'bold',
-}
 
 function Label(props) {
     const lStyle = {
@@ -118,7 +123,7 @@ function Price(props) {
     )
 }
 
-function Description(props) { //TODO: ellipsis ?
+function Description(props) {
     const boxStyle = {
         width: '100%', height: '50px'
     }

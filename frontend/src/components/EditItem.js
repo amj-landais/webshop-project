@@ -2,9 +2,9 @@ import {useState} from "react";
 
 function EditItem(props) {
 
-    const [title, setTitle] = useState(props.item.title);
-    const [description, setDescription] = useState(props.item.description);
-    const [price, setPrice] = useState(props.item.price);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState('');
 
     const [failedDeletion, setFailedDeletion] = useState(false);
     const [failedModification, setFailedModification] = useState(false);
@@ -21,17 +21,18 @@ function EditItem(props) {
         setPrice(e.target.value);
     }
 
-
     function closeClick() {
         const modal = document.getElementById('modalEdit' + props.item.pk);
         modal.style.display = 'none';
     }
 
     function openModalEdit() {
+        setTitle(props.item.title)
+        setPrice(props.item.price)
+        setDescription(props.item.description)
         const modal = document.getElementById('modalEdit' + props.item.pk);
         modal.style.display = 'block';
     }
-
 
     const editItem = () => {
         console.log('Editing item');
@@ -78,7 +79,7 @@ function EditItem(props) {
                 'Authorization': 'Token ' + props.token,
             },
             body: ''
-            })
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('http error: ' + response.statusCode)
@@ -169,7 +170,6 @@ function EditItem(props) {
 
     return (
         <div style={editStyle}>
-
             <div>
                 <button style={buttonStyle} onClick={openModalEdit}>
                     Edit your item
@@ -183,35 +183,33 @@ function EditItem(props) {
                     <div style={editContentStyle}>
                         <h1> Edit your item</h1>
 
-                        <div>
-                            <label
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                <div style={{display: 'flex', margin: '10px'}}>
-                                    <div style={{width: '150px', textAlign: 'left'}}>
-                                        Title:
-                                    </div>
-                                    <input style={inputStyle} type='text' value={title} maxLength='25'
-                                           onChange={updateTValue}/>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                            <div style={{display: 'flex', margin: '10px'}}>
+                                <div style={{width: '150px', textAlign: 'left'}}>
+                                    Title:
                                 </div>
-                                <div style={{display: 'flex', margin: '10px'}}>
-                                    <div style={{width: '150px', textAlign: 'left'}}>
-                                        Description:
-                                    </div>
-                                    <textarea style={inputStyle} value={description} maxLength='100'
-                                              onChange={updateDValue} cols="30" rows="4"/>
+                                <input style={inputStyle} type='text' value={title.toString()} maxLength='25'
+                                       onChange={updateTValue}/>
+                            </div>
+                            <div style={{display: 'flex', margin: '10px'}}>
+                                <div style={{width: '150px', textAlign: 'left'}}>
+                                    Description:
                                 </div>
-                                <div style={{display: 'flex', margin: '10px'}}>
-                                    <div style={{width: '150px', textAlign: 'left'}}>
-                                        Price (€):
-                                    </div>
-                                    <input style={inputStyle} type='text' value={price} onChange={updatePValue}/>
+                                <textarea style={inputStyle} value={description.toString()} maxLength='100'
+                                          onChange={updateDValue} cols="30" rows="4"/>
+                            </div>
+                            <div style={{display: 'flex', margin: '10px'}}>
+                                <div style={{width: '150px', textAlign: 'left'}}>
+                                    Price (€):
                                 </div>
-                            </label>
+                                <input style={inputStyle} type='text' value={price.toString()} onChange={updatePValue}/>
+                            </div>
                         </div>
 
                         <div>

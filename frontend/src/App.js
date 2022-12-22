@@ -12,31 +12,26 @@ import Account from "./components/Account";
 
 function App() {
 
+    const apiUriBase = 'http://127.0.0.1:8000/api/';
+    const apiUri = apiUriBase + 'v1/items';
+
     const [availableItems, setAvailableItems] = useState([]);
     const [totalItems, setTotalItems] = useState(0);
     let availableItemsList = [];
     const [basketList, setBasketList] = useState(() => {
-        if (localStorage.basketList) return JSON.parse(localStorage.getItem("basketList"));
+        if (sessionStorage.basketList) return JSON.parse(sessionStorage.getItem("basketList"));
         else return [];
-
     });
     const [logged, setLogged] = useState(false);
     const [username, setUsername] = useState(() => {
-        // this function is needed if we want to use local storage
-        if (localStorage.username) {
-            return localStorage.getItem("username");
+        if (sessionStorage.username) {
+            return sessionStorage.getItem("username");
         } else return ''
     });
+    const [searchText, setSearchText] = useState('');
 
-    const [searchText, setSearchText] = useState('')
-
-    function updateSearchText(e) {
-        console.log(e.target.value)
-        setSearchText(e.target.value);
-    }
-
+    /** add item to basketList */
     const addItemClick = (item) => {
-        console.log(item);
         setBasketList((prevState) => [...prevState, item]);
     }
 
@@ -51,10 +46,15 @@ function App() {
         }
     )
 
+
+
+    /** remove all items from the basketList */
     const removeAllClick = () => {
         setBasketList([]);
     }
 
+
+    /** remove item from basketList */
     const removeItemClick = (itemId) => {
         setBasketList((prevState) => {
             return prevState.filter((id, idx) => idx !== itemId)
@@ -63,49 +63,42 @@ function App() {
 
     //using local storage to store the basket whenever it changes.
     useEffect(() => {
-        localStorage.setItem("basketList", JSON.stringify(basketList))
+        sessionStorage.setItem("basketList", JSON.stringify(basketList))
     }, [basketList])
 
-    //using local storage to store the username whenever it changes.
     useEffect(() => {
-        localStorage.setItem("username", username)
+        sessionStorage.setItem("username", username)
     }, [username])
 
 
     useEffect(() => {
-        console.log('App changed');
         document.title = 'Webshop';
     }, [])
 
 
-    // const updateItemsBasket = (updatedList) => {
-    //     setBasketList(updatedList);
-    //     console.log(updatedList)
-    //     refreshItems(logged);
-    // }
-
-
     //--------------------- LOGGING IN --------------------------
+
+    const [loginFailed, setLoginFailed] = useState(false);
 
     const [token, setToken] = useState(() => {
         // this function is needed if we want to use local storage
-        if (localStorage.token) {
-            if (localStorage.getItem("token") !== "\"\"") {
+        if (sessionStorage.token) {
+            if (sessionStorage.getItem("token") !== "\"\"") {
                 setLogged(true);
             }
-            return localStorage.getItem("token");
+            return sessionStorage.getItem("token");
         } else return '';
     });
 
     //using local storage to store the token whenever it changes.
     useEffect(() => {
-        localStorage.setItem("token", token)
+        sessionStorage.setItem("token", token)
     }, [token])
 
 
     const login = (user, pass) => {
         console.log('Logging in ', user, pass);
-        fetch(' http://127.0.0.1:8000/api/auth/v1/login/', {
+        fetch(apiUriBase + 'auth/v1/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -126,18 +119,20 @@ function App() {
                 setToken(data.token);
                 setLogged(true);
                 setUsername(user);
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + data.token)
+                setNextPage(apiUriBase + 'v1/items/sale/' + data.token)
+                setLoginFailed(false);
             })
             .catch((err) => {
                 console.log("Error ", err);
                 setUsername('');
                 setToken('');
                 setLogged(false);
+                setLoginFailed(true);
             })
     }
 
-    //--------------------- LOGGING OUT --------------------------
 
+    //--------------------- LOGGING OUT --------------------------
     const logout = () => {
         setToken('');
         setUsername('');
@@ -147,46 +142,37 @@ function App() {
     }
 
     //--------------------- REFRESH ITEMS --------------------------
-
     const refreshItems = useCallback(() => {
         setAvailableItems([]);
         if (logged) {
             if (searchText !== '') {
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + token + '/' + searchText);
-                loadMore('http://127.0.0.1:8000/api/v1/items/sale/' + token + '/' + searchText);
-                console.log("items with search bar & logged")
+                setNextPage(apiUriBase + 'v1/items/sale/' + token + '/' + searchText);
+                loadMore(apiUriBase + 'v1/items/sale/' + token + '/' + searchText);
             } else {
-                setNextPage('http://127.0.0.1:8000/api/v1/items/sale/' + token)
-                loadMore('http://127.0.0.1:8000/api/v1/items/sale/' + token);
-                console.log("items with NO search bar & logged")
+                setNextPage(apiUriBase + 'v1/items/sale/' + token)
+                loadMore(apiUriBase + 'v1/items/sale/' + token);
 
             }
         } else {
             if (searchText !== '') {
                 setNextPage(apiUri + '/' + searchText)
                 loadMore(apiUri + '/' + searchText);
-                console.log("items with search bar & NOT logged")
 
             } else {
                 setNextPage(apiUri)
                 loadMore(apiUri);
-                console.log("items with NO search bar & NOT logged")
 
             }
         }
-    }, [searchText, token, logged])
+    }, [searchText, token, logged, apiUri])
 
     useEffect(() => {
         refreshItems()
-        console.log('useEffect: refreshItems done')
     }, [refreshItems])
 
-
     //--------------------- LOADING MORE ITEMS --------------------------
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const apiUri = 'http://127.0.0.1:8000/api/v1/items';
     const [nextPage, setNextPage] = useState(apiUri);
 
     const loadMore = (page) => {
@@ -202,7 +188,7 @@ function App() {
                 return response.json();
             })
             .then((data) => {
-                console.log('Data: ', data, data.count, data.next, data.prev, data.results);
+                // console.log('Data: ', data, data.count, data.next, data.prev, data.results);
                 setLoading(false);
                 setAvailableItems((prevItems) => [...prevItems, ...data.results]);
                 setTotalItems(data.count);
@@ -231,16 +217,15 @@ function App() {
                          alt="Shop's Logo"/>
                     <div className='webshopName'>Webshop</div>
                 </div>
-                <form>
-                    <input id='searchBar' type='text' value={searchText} onChange={updateSearchText} placeholder="Search an item here"/>
-                </form>
 
                 <Basket itemList={basketList}
                         removeItemHandler={removeItemClick}
                         removeAllHandler={removeAllClick}
                         loggedIn={logged}
                         refreshItems={refreshItems}
-                        addItemBasket={addItemClick}></Basket>
+                        addItemBasket={addItemClick}
+                        token={token}
+                        setBasketList={setBasketList}></Basket>
 
             </div>
 
@@ -259,11 +244,13 @@ function App() {
                            element={<ItemsContainer loadMoreHandler={() => loadMore(nextPage)}
                                                     availableItems={availableItemsList}
                                                     totalNumberItems={totalItems} next={nextPage} loading={loading}
-                                                    error={error}/>}/>
+                                                    error={error}
+                                                    setSearchText={setSearchText}
+                                                    searchText={searchText}/>}/>
                     <Route path='/login'
-                           element={<InputFormLogIn text={'Log in'} login={login} loggedIn={logged}></InputFormLogIn>}/>
+                           element={<InputFormLogIn text={'Log in'} login={login} loggedIn={logged} loginFailed={loginFailed}/>}/>
                     <Route path='/signup'
-                           element={<InputFormRegister text={'Sign up'}></InputFormRegister>}/>
+                           element={<InputFormRegister text={'Sign up'} loggedIn={logged}></InputFormRegister>}/>
                     <Route path='/myitems'
                            element={<MyItems loggedIn={logged} token={token} username={username}></MyItems>}/>
                     <Route path='/account'

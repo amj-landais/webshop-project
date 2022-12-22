@@ -34,12 +34,11 @@ function MyItems(props) {
             .catch(err => {
                 console.log('ERROR: ', err.name, err.message);
             })
-    },[props.token])
+    }, [props.token])
 
 
     useEffect(() => {
         fetchUserItems();
-        console.log("useEffect MyItems")
     }, [fetchUserItems])
 
 
@@ -50,26 +49,31 @@ function MyItems(props) {
             // if (basketList.find((i) => i.pk === item.pk)) {
             //     clickable = false;
             // }
-            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token} fetchUserItems={fetchUserItems}/>
+            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token}
+                         fetchUserItems={fetchUserItems}/>
         }
     )
 
     soldItemsList = (allItems.filter((item) => (item.status === 'SOLD') && (item.seller === username))).map((item) => {
-            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token} fetchUserItems={fetchUserItems}/>
+            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token}
+                         fetchUserItems={fetchUserItems}/>
         }
     )
 
     boughtItemsList = (allItems.filter((item) => (item.status === 'SOLD') && (item.buyer === username))).map((item) => {
-            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token} fetchUserItems={fetchUserItems}/>
+            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token}
+                         fetchUserItems={fetchUserItems}/>
         }
     )
 
     saleItemsList = (allItems.filter((item) => (item.status === 'SALE') && (item.seller === username))).map((item) => {
-            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token} fetchUserItems={fetchUserItems}/>
+            return <Item item={item} clickable={false} addBasketPossible={false} token={props.token}
+                         fetchUserItems={fetchUserItems}/>
         }
     )
 
 
+    //-------------------------- CSS -----------------------------------
 
     const myItemsStyle = {
         backgroundColor: '#c4dede',

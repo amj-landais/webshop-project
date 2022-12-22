@@ -1,14 +1,11 @@
 import {useState} from "react";
 
-
 function AddNewItem(props) {
 
     const [hide, setHide] = useState(true);
-
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
-
     const [failed, setFailed] = useState(false);
 
     function updateTValue(e) {
@@ -29,13 +26,13 @@ function AddNewItem(props) {
         setTitle('');
         setPrice('');
         setDescription('');
+        setFailed(false);
     }
 
-    //'v1/items/user/
 
     const addItemHandler = (itemTitle, itemDescription, itemPrice) => {
         console.log('Adding ', itemTitle);
-        fetch(' http://127.0.0.1:8000/api/v1/items/user/'+props.token, {
+        fetch(' http://127.0.0.1:8000/api/v1/items/user/' + props.token, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -65,7 +62,7 @@ function AddNewItem(props) {
     }
 
 
-    //--------------------------CSS----------------------------------------
+    //-------------------------- CSS -----------------------------------
     const buttonStyle = {
         borderColor: "#0e434f",
         color: "#0e434f",
@@ -98,9 +95,11 @@ function AddNewItem(props) {
     }
 
     const inputStyle = {
-        fontFamily:'Helvetica',
+        fontFamily: 'Helvetica',
         fontSize: '15px',
     }
+
+    //-------------------------- RETURN -----------------------------------
 
     return (
         <div style={{width: '80%', margin: '30px'}}>
@@ -119,18 +118,21 @@ function AddNewItem(props) {
                         <div style={{width: '150px', textAlign: 'left'}}>
                             Description:
                         </div>
-                        <textarea style={inputStyle} value={description} maxLength='100' onChange={updateDValue} cols="30" rows="4"/>
+                        <textarea style={inputStyle} value={description} maxLength='100' onChange={updateDValue}
+                                  cols="30" rows="4"/>
                     </div>
                     <div style={{display: 'flex', margin: '10px'}}>
                         <div style={{width: '150px', textAlign: 'left'}}>
                             Price (€):
                         </div>
-                        <input style={inputStyle} type='text' value={price} onChange={updatePValue}/>
+                        <input style={inputStyle} type='number' step='0.01' value={price} onChange={updatePValue}/>
                     </div>
                 </label>
 
                 <div style={{display: 'flex'}}>
-                    <button style={buttonStyle} onClick={() => addItemHandler(title, description, price)}>Add my new item</button>
+                    <button style={buttonStyle} onClick={() => addItemHandler(title, description, price)}>Add my new
+                        item
+                    </button>
                     <button style={close} onClick={reinitializeFields}>Cancel</button>
                 </div>
 
